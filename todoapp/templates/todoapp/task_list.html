@@ -1,24 +1,62 @@
-{% if request.user.is_authenticated %}
-    <p>{{request.user}}</p>
+{% extends 'todoapp/layout.html'%}
+
+{% block content %}
+
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<div class="header-bar">
+    <div>
+        <h1>Welcome Back {{request.user | title}}</h1>
+        <h3 style="margin:0"> You have <i>{{count}}</i>incomplete task {{count | pluralize}}</h3>
+    </div>
+    {% if request.user.is_authenticated %}
     <a href="{% url 'logout' %}">Logout</a>
     {% else %}
     <a href="{% url 'login' %}">Login</a>
     {% endif %}
-<hr>
-<h1>My to do List</h1>
-<a href="{% url 'task-create'%}">Add Task</a>
-<table>
-    <tr>
-        <th>Item</th>
-    </tr>
-    {% for task in task %}
-    <tr>
-        <td>{{task.title}}</td>
-        <td><a href="{% url 'task' task.id %}">View</a><td>
-        <td><a href="{% url 'task-update' task.id %}">Edit</a></td>
-        <td><a href="{% url 'task-delete' task.id %}">Delete</a></td>
-    </tr>
-    {% empty%}
-    <p>No items in the list</p>
+    
+</div>
+
+<form style="display: none;" id="reorderForm" method="post" action="{% url 'task-reorder' %}">
+    {% csrf_token %}
+    <input type="hidden" id="positionInput" name="position">
+</form>
+
+
+
+<div class="search-wrapper">
+    <form method = "GET" style="display: flex">
+        <input type="text" name="search-area" placeholder="Search..." value="{{search_input}}">
+        <input class="button"type="submit" value = "Search">
+    </form>
+    <a class="add-link" href="{% url 'task-create'%}"></a> 
+
+</div>
+
+
+
+<div class="task-items-wrapper">
+    {% for task in tasks %}
+    <div class="task-wrapper" >
+        <div class="task-title">
+            {% if task.complete %}
+            <div class="task-complete-icon"></div>
+            <a href="{% url 'task-update' task.id %}">{{task}}</a>
+            {% else %}
+            <div class="task-incomplete-icon"></div>
+            <a href="{% url 'task-update' task.id %}">{{task}}</a> 
+            {% endif %}    
+        </div>
+        <div class="task-controls">
+            <a class="delete-link" href="{% url 'task-delete'%}" ></a>
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding-bottom: 10px; line-height:1em;">
+        <h3>No new Item in the list</h3>
+        <h3> Create a <a style="text-decoration: none ; color: blue"href="{% url 'task-create' %}">New task </a>!</h3>
+    </div>
+ 
     {% endfor %}
-</table>
+</div>  
+{% endblock %}
